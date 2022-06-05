@@ -13,6 +13,5 @@ public class ModelComponent implements Component {
     public ModelComponent(Model model, float x, float y, float z){
         this.model = model;
         this.instance = new ModelInstance(model,new Matrix4().setToTranslation(x,y,z));
-        System.out.println("Model Componen Up");
     }
 }

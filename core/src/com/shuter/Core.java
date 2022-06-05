@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.shuter.screens.MainMenuScreen;
 
 public class Core extends ApplicationAdapter {
     public static final float VIRTUAL_WIDTH = 960;
@@ -12,7 +13,9 @@ public class Core extends ApplicationAdapter {
 
     @Override
     public void create(){
-        setScreen(new GameScreen(this));
+        new Assets();
+        new Settings().load();
+        setScreen(new MainMenuScreen(this));
         System.out.println("Core up");
     }
 
@@ -26,6 +29,12 @@ public class Core extends ApplicationAdapter {
     @Override
     public void resize(int width, int height){
         screen.resize(width,height);
+    }
+
+    @Override
+    public void dispose(){
+        Assets.dispose();
+        Settings.save();
     }
 
     public void setScreen(Screen screen){

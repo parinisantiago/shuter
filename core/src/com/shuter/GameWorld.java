@@ -17,6 +17,7 @@ import com.shuter.components.CharacterComponent;
 import com.shuter.components.ModelComponent;
 import com.shuter.managers.EntityFactory;
 import com.shuter.systems.*;
+import com.shuter.ui.GameUI;
 
 public class GameWorld {
 
@@ -50,12 +51,12 @@ public class GameWorld {
                     FloatAttribute.createShininess(16f)),
             VertexAttribute.Position().usage | VertexAttribute.Normal().usage);
 
-    public GameWorld(){
+    public GameWorld(GameUI gameUI){
         Bullet.init();
         this.initCamera();
         this.initEnviroment();
         this.initBatch();
-        this.addSystems();
+        this.addSystems(gameUI);
         this.addEntities();
         System.out.println("GameWorld Up");
     }
@@ -78,11 +79,11 @@ public class GameWorld {
         engine.addEntity(EntityFactory.createStaticEntity(wallVertical, -20, 10, 0));
     }
 
-    private void addSystems(){
+    private void addSystems(GameUI gameUI){
         this.engine = new Engine();
         this.engine.addSystem(new RenderSystem(this.batch, this.environment));
         this.engine.addSystem(this.collisionSystem = new CollisionSystem());
-        this.engine.addSystem(new PlayerSystem(this, this.camera));
+        this.engine.addSystem(new PlayerSystem(this, this.camera, gameUI));
         this.engine.addSystem(new EnemySystem(this));
         this.engine.addSystem(new StatusSystem(this));
     }
@@ -122,6 +123,21 @@ public class GameWorld {
 
     public void render(float delta){
         this.renderWorld(delta);
+        checkPause();
+    }
+
+    private void checkPause() {
+        if (Settings.Paused) {
+            engine.getSystem(PlayerSystem.class).setProcessing(false);
+            engine.getSystem(EnemySystem.class).setProcessing(false);
+            engine.getSystem(StatusSystem.class).setProcessing(false);
+            engine.getSystem(CollisionSystem.class).setProcessing(false);
+        } else {
+            engine.getSystem(PlayerSystem.class).setProcessing(true);
+            engine.getSystem(EnemySystem.class).setProcessing(true);
+            engine.getSystem(StatusSystem.class).setProcessing(true);
+            engine.getSystem(CollisionSystem.class).setProcessing(true);
+        }
     }
 
     private void renderWorld(float delta) {

@@ -9,8 +9,12 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.collision.ClosestRayResultCallback;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.shuter.GameWorld;
+import com.shuter.Settings;
 import com.shuter.components.*;
 import com.badlogic.gdx.graphics.Camera;
+import com.shuter.ui.GameUI;
+
+import java.awt.font.GlyphMetrics;
 
 public class PlayerSystem extends EntitySystem implements EntityListener {
     private Entity player;
@@ -23,11 +27,13 @@ public class PlayerSystem extends EntitySystem implements EntityListener {
     private Vector3 rayFrom = new Vector3();
     private Vector3 rayTo = new Vector3();
     private ClosestRayResultCallback rayTestCB;
+    private GameUI gameUI;
 
-    public PlayerSystem(GameWorld gameWorld, Camera camera){
+    public PlayerSystem(GameWorld gameWorld, Camera camera, GameUI gameUI){
         this.camera = camera;
         this.rayTestCB = new ClosestRayResultCallback(Vector3.Zero, Vector3.Z);
         this.gameWorld = gameWorld;
+        this.gameUI = gameUI;
     }
 
     @Override
@@ -52,6 +58,19 @@ public class PlayerSystem extends EntitySystem implements EntityListener {
     public void update(float delta){
         if(this.player == null) return;
         this.updateMovement(delta);
+        updateStatus();
+        checkGameOver();
+    }
+
+    private void checkGameOver() {
+        if (playerComponent.health <= 0 && !Settings.Paused) {
+            Settings.Paused = true;
+            gameUI.gameOverWidget.gameOver();
+        }
+    }
+
+    private void updateStatus() {
+        gameUI.healthWidget.setValue(playerComponent.health);
     }
 
     private void updateMovement(float delta) {
@@ -102,6 +121,7 @@ public class PlayerSystem extends EntitySystem implements EntityListener {
             final btCollisionObject obj = rayTestCB.getCollisionObject();
             if(((Entity) obj.userData).getComponent(EnemyComponent.class) != null){
                 ((Entity) obj.userData).getComponent(StatusComponent.class).alive = false;
+                PlayerComponent.score += 100;
             }
         }
     }
